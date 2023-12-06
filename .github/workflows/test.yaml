@@ -1,0 +1,35 @@
+name: test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [16,17]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+      - name: Set up .env
+        run: echo '${{ secrets.ENV_VARS }}' >> .env
+
+      - name: install
+        run: |
+          pnpm install 
+          pnpm prisma generate
+
+      - name: Running...
+        run: |
+          pnpm jest --testPathPattern=code
+          pnpm jest --testPathPattern=code
